@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ChatForm from "./components/ChatForm";
 import ChatMessage from "./components/ChatMessage";
 import { socket } from "./lib/socketClient";
@@ -12,12 +12,12 @@ export default function Home() {
   >([]);
   const [userName, setUserName] = useState("");
 
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
   const handleSendMessage = (message: string) => {
     const data = { room, message, sender: userName };
     setMessages((prev) => [...prev, { sender: userName, message }]);
-    socket.emit("message", data);
-    console.log(message);
-    
+    socket.emit("message", data);   
   };
 
   useEffect(() => {
@@ -34,6 +34,13 @@ export default function Home() {
       socket.off("message");
     };
   }, []);
+
+  // เลื่อน scroll bar ลงมาด้านล่างสุดเมื่อ messages เปลี่ยน
+  useEffect(() => {
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
 
   const handleJoinRoom = () => {
     if (room && userName) {
@@ -70,7 +77,7 @@ export default function Home() {
       ) : (
         <div className="w-full max-w-3xl mx-auto">
           <h1 className="mb-4 text-2xl font-bold">Room: {room}</h1>
-          <div className="h-[500px] overflow-y-auto p-4 mb-4 bg-gray-200 border-2 rounded-lg">
+          <div className="h-[600px] overflow-y-auto p-4 mb-4 bg-gray-200 border-2 rounded-lg">
             {messages.map((msg, index) => (
               <ChatMessage
                 key={index}
@@ -79,6 +86,8 @@ export default function Home() {
                 isOwnMessage={msg.sender === userName}
               />
             ))}
+            {/* ใช้ div นี้เป็นตำแหน่งปลายของข้อความ */}
+            <div ref={chatEndRef} />
           </div>
           <ChatForm onSendMessage={handleSendMessage} />
         </div>
