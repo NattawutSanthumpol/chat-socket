@@ -26,6 +26,7 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning={false}
       >
         <div className="mx-auto max-w-7xl px-4">
         {children}
